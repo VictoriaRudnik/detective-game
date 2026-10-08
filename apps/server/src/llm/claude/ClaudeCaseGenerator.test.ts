@@ -1,4 +1,4 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 import { sampleCase } from "@game/shared/testing";
 import { LlmError } from "../types";
@@ -46,5 +46,28 @@ describe("ClaudeCaseGenerator", () => {
   ])("throws LlmError on %s", async (_label, response) => {
     const { client } = stubClient(response);
     await expect(new ClaudeCaseGenerator(client, "m").generate({ language: "en", suspectCount: 3 })).rejects.toBeInstanceOf(LlmError);
+  });
+});
+
+describe("ClaudeCaseGenerator with the real SDK client", () => {
+  it("is not rejected by the SDK's long-request guard for non-streaming calls", async () => {
+    // A real client with a fake network: exercises the SDK's own request checks, makes no API call.
+    const fetch = async () =>
+      new Response(
+        JSON.stringify({
+          id: "msg_1",
+          type: "message",
+          role: "assistant",
+          model: "m",
+          stop_reason: "end_turn",
+          stop_sequence: null,
+          usage: { input_tokens: 1, output_tokens: 1 },
+          content: [{ type: "text", text: JSON.stringify(sampleCase(3)) }],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    const client = new Anthropic({ apiKey: "test-key", fetch, maxRetries: 0 });
+    const generated = await new ClaudeCaseGenerator(client, "claude-opus-5-5").generate({ language: "en", suspectCount: 3 });
+    expect(generated).toEqual(sampleCase(3));
   });
 });

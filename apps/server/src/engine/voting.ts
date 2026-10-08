@@ -1,6 +1,6 @@
 import type { GameErrorCode, RoomState } from "@game/shared";
 import type { ActionOf } from "./actions";
-import { appendSystem, findPlayer } from "./state";
+import { appendSystem, findPlayer, isConnected, nextConnectedPlayerId } from "./state";
 import type { EngineCtx } from "./types";
 
 type Result = GameErrorCode | undefined;
@@ -47,6 +47,8 @@ export function resolveVoteIfComplete(s: RoomState, ctx: EngineCtx): void {
   if (leaders.length > 1 && !vote.forced && s.movesLeft > 0) {
     s.phase = "investigating";
     s.vote = undefined;
+    // The turn holder may have left during the vote; disconnect only moves the turn while investigating.
+    if (!isConnected(s, s.turnPlayerId)) s.turnPlayerId = nextConnectedPlayerId(s, s.turnPlayerId);
     appendSystem(s, "VOTE_TIED", ctx);
     return;
   }

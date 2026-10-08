@@ -5,6 +5,8 @@ import { buildCaseUserPrompt, CASE_SYSTEM_PROMPT } from "../prompts/casePrompt";
 import { LlmError, type CaseGenerator, type CaseRequest } from "../types";
 import { FALLBACK_BETA } from "./constants";
 
+const CASE_REQUEST_TIMEOUT_MS = 10 * 60_000;
+
 export class ClaudeCaseGenerator implements CaseGenerator {
   constructor(
     private readonly client: Anthropic,
@@ -12,16 +14,20 @@ export class ClaudeCaseGenerator implements CaseGenerator {
   ) {}
 
   async generate(req: CaseRequest, feedback: string[] = []): Promise<GeneratedCase> {
-    const response = await this.client.beta.messages.parse({
-      model: this.model,
-      max_tokens: 32000,
-      betas: [FALLBACK_BETA],
-      fallbacks: "default",
-      thinking: { type: "adaptive" },
-      output_config: { effort: "high", format: betaZodOutputFormat(GeneratedCaseSchema) },
-      system: CASE_SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildCaseUserPrompt(req, feedback) }],
-    });
+    // Without an explicit timeout the SDK refuses non-streaming requests this large (32k max_tokens).
+    const response = await this.client.beta.messages.parse(
+      {
+        model: this.model,
+        max_tokens: 32000,
+        betas: [FALLBACK_BETA],
+        fallbacks: "default",
+        thinking: { type: "adaptive" },
+        output_config: { effort: "high", format: betaZodOutputFormat(GeneratedCaseSchema) },
+        system: CASE_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: buildCaseUserPrompt(req, feedback) }],
+      },
+      { timeout: CASE_REQUEST_TIMEOUT_MS },
+    );
     if (response.stop_reason !== "end_turn") {
       throw new LlmError(`case generation stopped with ${response.stop_reason}`);
     }

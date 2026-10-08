@@ -52,6 +52,18 @@ describe("castVote", () => {
     expect(s.log.at(-1)).toMatchObject({ kind: "system", code: "VOTE_TIED" });
   });
 
+  it("passes the turn on after a tie if its holder left during the vote", () => {
+    const s = apply(
+      investigating(["p1", "p2", "p3"]),
+      propose("p2"),
+      { type: "disconnect", playerId: "p1" },
+      cast("p2", "s1"),
+      cast("p3", "s2"),
+    );
+    expect(s.phase).toBe("investigating");
+    expect(s.turnPlayerId).toBe("p2");
+  });
+
   it("resolves a regular tie randomly when no questions are left", () => {
     const noMoves: RoomState = { ...investigating(), movesLeft: 0 };
     const s = apply(noMoves, propose(), cast("p1", "s1"), cast("p2", "s2"));
