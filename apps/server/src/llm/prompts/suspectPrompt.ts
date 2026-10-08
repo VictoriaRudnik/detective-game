@@ -29,6 +29,7 @@ export function buildSuspectSystemPrompt(c: Case, suspect: Suspect): string {
     `Time of death: ${b.timeOfDeath}`,
     `Cause of death: ${b.causeOfDeath}`,
     `Setting: ${b.setting}`,
+    ...(b.evidence.length > 0 ? ["Evidence found by the police (known to everyone):", ...b.evidence.map((e) => `- ${e}`)] : []),
     "",
     "## Other people present",
     ...others,

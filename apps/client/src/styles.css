@@ -112,6 +112,8 @@ h2 { font-size: 1.15rem; letter-spacing: 0.02em; }
 .briefing dl { margin: 0; display: grid; gap: 6px; }
 .briefing dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .briefing dd { margin: 0; }
+.briefing h3 { margin: 16px 0 6px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.briefing .evidence { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 
 .suspects ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .suspect-card {
@@ -155,6 +157,8 @@ h2 { font-size: 1.15rem; letter-spacing: 0.02em; }
 
 /* Vote */
 .vote { display: flex; flex-direction: column; gap: 16px; max-width: 640px; margin: 0 auto; }
+.vote-record h2 { margin: 0 0 8px; font-size: 1rem; color: var(--muted); }
+.vote-record .log { height: min(40vh, 420px); }
 
 /* Reveal */
 .reveal { display: flex; flex-direction: column; gap: 16px; max-width: 760px; margin: 0 auto; }

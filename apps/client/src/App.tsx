@@ -29,7 +29,8 @@ export function App() {
     });
   }, [connected, view, invitedRoomId, actions]);
 
-  // The UI follows the room's language when it changes; players can still switch it by hand.
+  // Inside a room the UI is locked to the room's language: the case text itself is generated in that
+  // language, so a different UI language would mix the two on every screen.
   useEffect(() => {
     if (view?.language) void i18n.changeLanguage(view.language);
   }, [view?.language, i18n]);
@@ -38,7 +39,7 @@ export function App() {
     <div className="app">
       <header className="topbar">
         <span className="brand">{t("app.title")}</span>
-        <LanguageSwitch />
+        {!view && <LanguageSwitch />}
       </header>
 
       {view && playerId ? (

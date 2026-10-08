@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: live-suspects-server
+    runtime: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: pnpm --filter @game/server start
+    healthCheckPath: /health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: CLIENT_ORIGIN
+        sync: false # your Vercel URL, e.g. https://live-suspects.vercel.app
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false

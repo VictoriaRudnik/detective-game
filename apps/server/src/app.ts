@@ -9,6 +9,8 @@ import { createRoomEvents, registerSocketHandlers, type GameServer } from "./tra
 export interface ServerOptions {
   port: number;
   host?: string;
+  /** Browser origin allowed to connect when the client is hosted elsewhere (e.g. Vercel). */
+  clientOrigin?: string;
   caseGenerator: CaseGenerator;
   suspectResponder: SuspectResponder;
 }
@@ -29,7 +31,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
   const app = Fastify();
   app.get("/health", async () => ({ ok: true }));
 
-  const io: GameServer = new Server(app.server);
+  const io: GameServer = new Server(app.server, options.clientOrigin ? { cors: { origin: options.clientOrigin.split(",") } } : undefined);
   const manager = new RoomManager({
     caseGenerator: options.caseGenerator,
     suspectResponder: options.suspectResponder,
