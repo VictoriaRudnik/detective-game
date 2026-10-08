@@ -1,0 +1,26 @@
+{
+  "name": "@game/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "gen:case": "tsx src/scripts/genCase.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "socket.io-client": "^4.8.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@game/shared": "workspace:*",
+    "fastify": "^5.12.5",
+    "socket.io": "^4.8.4",
+    "zod": "^4.6.5"
+  }
+}
