@@ -1,0 +1,88 @@
+{
+  "app": { "title": "Live Suspects", "tagline": "Interrogate the suspects. Find the killer." },
+  "lang": { "en": "English", "ru": "Русский" },
+  "home": {
+    "name": "Your name",
+    "newCase": "New case",
+    "language": "Case language",
+    "suspects": "Suspects",
+    "create": "Create room",
+    "joinTitle": "Join friends",
+    "joinCode": "Room code",
+    "join": "Join"
+  },
+  "lobby": {
+    "title": "Waiting room",
+    "code": "Room code",
+    "copyLink": "Copy invite link",
+    "copied": "Link copied!",
+    "players": "Detectives",
+    "host": "host",
+    "you": "you",
+    "offline": "offline",
+    "start": "Start the investigation",
+    "waitingHost": "Waiting for the host to start…",
+    "rules": "Take turns asking the suspects questions. Your team shares {{moves}} questions. When you are ready, call a vote and name the killer."
+  },
+  "generating": { "title": "Preparing the case…", "hint": "The crime scene is being staged. This can take up to a minute." },
+  "inv": {
+    "victim": "Victim",
+    "location": "Location",
+    "time": "Time of death",
+    "cause": "Cause of death",
+    "suspects": "Suspects",
+    "moves": "Questions left: {{count}}",
+    "accuse": "Call a vote",
+    "yourTurn": "Your turn: pick a suspect and ask a question.",
+    "waitingFor": "Waiting for {{name}} to ask…",
+    "askPlaceholder": "Ask {{name}}…",
+    "chooseSuspect": "Choose a suspect first",
+    "ask": "Ask",
+    "chatPlaceholder": "Discuss with your team…",
+    "send": "Send",
+    "answering": "{{name}} is thinking…",
+    "asks": "{{player}} → {{suspect}}"
+  },
+  "system": {
+    "SUSPECT_SILENT": "The suspect stays silent… The question was not counted. Try again.",
+    "VOTE_STARTED": "A vote has been called.",
+    "VOTE_TIED": "The vote is tied. The investigation continues.",
+    "FORCED_VOTE": "No questions left. Time to name the killer."
+  },
+  "vote": {
+    "title": "Who is the killer?",
+    "hint": "Everyone votes. The majority decides.",
+    "forced": "You are out of questions. You must decide now.",
+    "voted": "voted",
+    "waiting": "thinking…"
+  },
+  "reveal": {
+    "correct": "Case closed! You caught the killer.",
+    "wrong": "Wrong suspect. The killer walks free.",
+    "accused": "You accused {{name}}.",
+    "killer": "The killer: {{name}}",
+    "method": "Method",
+    "motive": "Motive",
+    "evidence": "Key evidence",
+    "secrets": "What everyone was hiding",
+    "secret": "Secret",
+    "truth": "What really happened",
+    "newCase": "New case",
+    "waitingHost": "Waiting for the host to start a new case…"
+  },
+  "errors": {
+    "ROOM_NOT_FOUND": "That room does not exist (or it has expired).",
+    "NOT_IN_ROOM": "You are not in a room.",
+    "UNKNOWN_PLAYER": "You are not part of this room.",
+    "NOT_HOST": "Only the host can do that.",
+    "WRONG_PHASE": "You can't do that right now.",
+    "NOT_YOUR_TURN": "It's not your turn.",
+    "NO_MOVES_LEFT": "No questions left.",
+    "ANSWER_IN_PROGRESS": "Wait for the suspect to finish answering.",
+    "UNKNOWN_SUSPECT": "Unknown suspect.",
+    "INVALID_TEXT": "Messages must be 1–500 characters long.",
+    "INVALID_PAYLOAD": "Something went wrong with that request.",
+    "CASE_GENERATION_FAILED": "We couldn't prepare a case. Please try again.",
+    "CONNECTION": "Connection lost. Reconnecting…"
+  }
+}
