@@ -25,6 +25,10 @@ export function disconnect(s: RoomState, a: ActionOf<"disconnect">): Result {
     const next = nextConnectedPlayerId(s, player.id);
     if (next) s.hostId = next;
   }
+  // While their question is being answered the turn stays put; answerDone/answerFailed move it on.
+  if (s.phase === "investigating" && s.turnPlayerId === player.id && !s.pendingAnswer) {
+    s.turnPlayerId = nextConnectedPlayerId(s, player.id);
+  }
   return undefined;
 }
 

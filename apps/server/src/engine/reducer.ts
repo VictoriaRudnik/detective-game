@@ -1,5 +1,6 @@
 import type { GameErrorCode, RoomState } from "@game/shared";
 import type { Action } from "./actions";
+import { answerDone, answerFailed, ask, chat } from "./interrogation";
 import { caseFailed, caseReady, disconnect, join, restart, start } from "./lobby";
 import type { EngineCtx, ReducerResult } from "./types";
 
@@ -10,7 +11,7 @@ export function reduce(state: RoomState, action: Action, ctx: EngineCtx): Reduce
   return error ? { ok: false, error } : { ok: true, state: draft };
 }
 
-function dispatch(s: RoomState, action: Action, _ctx: EngineCtx): GameErrorCode | undefined {
+function dispatch(s: RoomState, action: Action, ctx: EngineCtx): GameErrorCode | undefined {
   switch (action.type) {
     case "join":
       return join(s, action);
@@ -24,5 +25,13 @@ function dispatch(s: RoomState, action: Action, _ctx: EngineCtx): GameErrorCode 
       return caseFailed(s);
     case "restart":
       return restart(s, action);
+    case "ask":
+      return ask(s, action, ctx);
+    case "answerDone":
+      return answerDone(s, action);
+    case "answerFailed":
+      return answerFailed(s, ctx);
+    case "chat":
+      return chat(s, action, ctx);
   }
 }
