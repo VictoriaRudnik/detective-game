@@ -30,6 +30,7 @@
     "location": "Location",
     "time": "Time of death",
     "cause": "Cause of death",
+    "evidence": "Evidence",
     "suspects": "Suspects",
     "moves": "Questions left: {{count}}",
     "accuse": "Call a vote",
@@ -53,6 +54,7 @@
     "title": "Who is the killer?",
     "hint": "Everyone votes. The majority decides.",
     "forced": "You are out of questions. You must decide now.",
+    "record": "Interrogation record",
     "voted": "voted",
     "waiting": "thinking…"
   },
