@@ -2,6 +2,7 @@ import type { GameErrorCode, RoomState } from "@game/shared";
 import type { ActionOf } from "./actions";
 import { appendSystem, findPlayer, isConnected, nextConnectedPlayerId, normalizeText } from "./state";
 import type { EngineCtx } from "./types";
+import { startVote } from "./voting";
 
 type Result = GameErrorCode | undefined;
 
@@ -25,7 +26,7 @@ export function ask(s: RoomState, a: ActionOf<"ask">, ctx: EngineCtx): Result {
   return undefined;
 }
 
-export function answerDone(s: RoomState, a: ActionOf<"answerDone">): Result {
+export function answerDone(s: RoomState, a: ActionOf<"answerDone">, ctx: EngineCtx): Result {
   const pending = s.pendingAnswer;
   if (!pending) return "WRONG_PHASE";
 
@@ -37,6 +38,7 @@ export function answerDone(s: RoomState, a: ActionOf<"answerDone">): Result {
   );
   s.pendingAnswer = undefined;
   s.turnPlayerId = nextConnectedPlayerId(s, s.turnPlayerId);
+  if (s.movesLeft === 0) startVote(s, undefined, true, ctx);
   return undefined;
 }
 

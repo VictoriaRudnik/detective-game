@@ -3,6 +3,7 @@ import type { Action } from "./actions";
 import { answerDone, answerFailed, ask, chat } from "./interrogation";
 import { caseFailed, caseReady, disconnect, join, restart, start } from "./lobby";
 import type { EngineCtx, ReducerResult } from "./types";
+import { castVote, proposeVote } from "./voting";
 
 /** Applies one action to a copy of the state. The input state is never modified. */
 export function reduce(state: RoomState, action: Action, ctx: EngineCtx): ReducerResult {
@@ -16,7 +17,7 @@ function dispatch(s: RoomState, action: Action, ctx: EngineCtx): GameErrorCode |
     case "join":
       return join(s, action);
     case "disconnect":
-      return disconnect(s, action);
+      return disconnect(s, action, ctx);
     case "start":
       return start(s, action);
     case "caseReady":
@@ -28,10 +29,14 @@ function dispatch(s: RoomState, action: Action, ctx: EngineCtx): GameErrorCode |
     case "ask":
       return ask(s, action, ctx);
     case "answerDone":
-      return answerDone(s, action);
+      return answerDone(s, action, ctx);
     case "answerFailed":
       return answerFailed(s, ctx);
     case "chat":
       return chat(s, action, ctx);
+    case "proposeVote":
+      return proposeVote(s, action, ctx);
+    case "castVote":
+      return castVote(s, action, ctx);
   }
 }

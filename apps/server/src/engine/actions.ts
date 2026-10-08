@@ -10,6 +10,8 @@ export type Action =
   | { type: "ask"; playerId: string; suspectId: string; text: string }
   | { type: "answerDone"; text: string }
   | { type: "answerFailed" }
-  | { type: "chat"; playerId: string; text: string };
+  | { type: "chat"; playerId: string; text: string }
+  | { type: "proposeVote"; playerId: string }
+  | { type: "castVote"; playerId: string; suspectId: string };
 
 export type ActionOf<T extends Action["type"]> = Extract<Action, { type: T }>;

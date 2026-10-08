@@ -1,6 +1,8 @@
 import { movesForSuspectCount, type GameErrorCode, type RoomState } from "@game/shared";
 import type { ActionOf } from "./actions";
 import { findPlayer, isConnected, nextConnectedPlayerId, resetToLobby } from "./state";
+import type { EngineCtx } from "./types";
+import { resolveVoteIfComplete } from "./voting";
 
 type Result = GameErrorCode | undefined;
 
@@ -17,7 +19,7 @@ export function join(s: RoomState, a: ActionOf<"join">): Result {
   return undefined;
 }
 
-export function disconnect(s: RoomState, a: ActionOf<"disconnect">): Result {
+export function disconnect(s: RoomState, a: ActionOf<"disconnect">, ctx: EngineCtx): Result {
   const player = findPlayer(s, a.playerId);
   if (!player) return "UNKNOWN_PLAYER";
   player.connected = false;
@@ -29,6 +31,7 @@ export function disconnect(s: RoomState, a: ActionOf<"disconnect">): Result {
   if (s.phase === "investigating" && s.turnPlayerId === player.id && !s.pendingAnswer) {
     s.turnPlayerId = nextConnectedPlayerId(s, player.id);
   }
+  resolveVoteIfComplete(s, ctx);
   return undefined;
 }
 
