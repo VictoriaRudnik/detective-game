@@ -39,7 +39,7 @@ game/
 │   ├─ llm/CaseGenerator.ts    interface + ClaudeCaseGenerator
 │   ├─ llm/SuspectResponder.ts interface + ClaudeSuspectResponder
 │   ├─ llm/caseValidator.ts    pure consistency checks
-│   ├─ llm/prompts/            prompt templates (en, ru)
+│   ├─ llm/prompts/            prompt builders (English instructions; output language is a parameter)
 │   ├─ llm/fakes.ts            FakeCaseGenerator, FakeSuspectResponder (tests, dev)
 │   ├─ rooms/RoomManager.ts    in-memory rooms, applies actions, orchestrates LLM calls
 │   ├─ transport/socket.ts     Socket.IO ↔ RoomManager, zod validation of events
@@ -60,9 +60,10 @@ game/
 
 - SDK: `@anthropic-ai/sdk`. API key in `ANTHROPIC_API_KEY`, server-only, loaded from `.env` (gitignored).
 - Models via env: `CASE_MODEL` and `SUSPECT_MODEL`, both defaulting to `claude-opus-5-5`.
-- **Case generation:** one streamed request, adaptive thinking, `output_config.effort: "high"`, structured output via `output_config.format` with a JSON schema derived from the zod `Case` schema (excluding server-assigned fields such as `id`). Parsed with zod, then validated (§5).
+- **Case generation:** one non-streaming `client.beta.messages.parse` request (`max_tokens: 32000`), adaptive thinking, `output_config.effort: "high"`, structured output via `output_config.format: betaZodOutputFormat(GeneratedCaseSchema)` (the zod `Case` schema without the server-assigned `id`). The schema lists `solution` before `suspects` so the model writes the truth first. Then validated (§5).
+- **Refusal fallbacks:** both calls send `betas: ["server-side-fallback-2026-07-01"]` and `fallbacks: "default"`, so a safety decline is retried server-side on a fallback model.
 - **Suspect answers:** streamed, `output_config.effort: "low"`. System prompt = shared case facts + the suspect's persona, claimed/true alibi, secret, knows, and behavior rules (stay in character, never reveal being an AI, lie about the secret unless cornered, the killer protects themselves but may slip under strong pressure, answer in the room language, keep answers short — 2–5 sentences). The system prompt is static per suspect and marked with `cache_control` so repeated questions hit the prompt cache.
-- **Memory:** each suspect keeps its own message history (`MessageParam[]`) — only the questions addressed to them and their answers. The history is append-only.
+- **Memory:** each suspect keeps its own history of `{role, content}` text turns — only the questions addressed to them and their answers (thinking blocks are not stored). The history is append-only.
 - **Refusals:** check `stop_reason` before reading content; a `refusal` is treated as an LLM failure (§7).
 - Exact SDK calls are confirmed against the claude-api skill docs during implementation, not from memory.
 
@@ -112,18 +113,18 @@ RoomState {
   case?: Case
   movesLeft: number
   turnPlayerId?: string
-  log: LogEntry[]             // {id, kind: 'question'|'answer'|'chat'|'system', playerId?, suspectId?, text, ts}
-  suspectHistories: Record<suspectId, MessageParam[]>
+  log: LogEntry[]             // question {playerId, suspectId, text} | answer {suspectId, text} | chat {playerId, text} | system {code}; all with id, ts
+  suspectHistories: Record<suspectId, {role, content}[]>
   vote?: { initiatorId; ballots: Record<playerId, suspectId>; forced: boolean }
-  pendingAnswer?: { suspectId; entryId }
+  pendingAnswer?: { suspectId; entryId; question }
   result?: { accusedId; correct: boolean }
 }
 ```
 
-`PublicRoomView` contains the same minus `suspectHistories`, with `case` reduced to `{title, language, briefing, suspects: {id, name, role, publicDescription}[]}` until `revealed`, when the full case is included.
+`PublicRoomView` contains the same minus `suspectHistories` and minus `pendingAnswer.question`, with `case` reduced to `{title, language, briefing, suspects: {id, name, role, publicDescription}[]}`. The full case is sent as a separate `reveal` field only in `revealed`. System log entries carry a code (`SUSPECT_SILENT`, `VOTE_STARTED`, `VOTE_TIED`, `FORCED_VOTE`) that the client translates.
 
 **Client → server:** `room:create {name, language, suspectCount}`, `room:join {roomId, name, playerId?}`, `game:start`, `ask {suspectId, text}`, `chat {text}`, `vote:propose`, `vote:cast {suspectId}`, `game:restart`.
-**Server → client:** `room:state PublicRoomView`, `answer:delta {entryId, text}`, `error {code, message}`, and acks on `room:create`/`room:join` returning `{roomId, playerId}`.
+**Server → client:** `room:state PublicRoomView`, `answer:delta {entryId, text}`, `game:error {code}`, and acks on `room:create`/`room:join` returning `{roomId, playerId}`.
 
 **Ask flow:**
 1. Reducer validates: phase `investigating`, sender is `turnPlayerId`, `movesLeft > 0`, no `pendingAnswer`, suspect exists, text 1–500 chars.
@@ -131,13 +132,13 @@ RoomState {
 3. RoomManager streams `SuspectResponder` output as `answer:delta`.
 4. On completion: fill answer entry, append Q/A to that suspect's history, clear `pendingAnswer`, advance turn to next connected player; if `movesLeft === 0`, enter forced vote. Broadcast.
 
-**Vote flow:** `vote:propose` allowed in `investigating` without `pendingAnswer`. Vote resolves when all connected players have cast a ballot (a disconnect during voting re-checks resolution). Resolution per §2.
+**Vote flow:** `vote:propose` allowed in `investigating` without `pendingAnswer`. Vote resolves when all connected players have cast a ballot (a disconnect during voting re-checks resolution). Resolution per §2; a tie is also resolved randomly when `movesLeft === 0`, so the room can never get stuck.
 
-**Connections:** `playerId` stored in `localStorage`; rejoining with a known `playerId` restores the player. Disconnected players are skipped in turn order; if the active player disconnects, the turn advances. If the host disconnects, the next connected player becomes host. A room with no connected players is deleted after 30 minutes. Joining is allowed in any phase (late joiners enter the turn rotation).
+**Connections:** `playerId` stored in `localStorage`; room codes are case-insensitive and trimmed; rejoining with a known `playerId` restores the player. Disconnected players are skipped in turn order; if the active player disconnects, the turn advances. If the host disconnects, the next connected player becomes host. A room with no connected players is deleted after 30 minutes. Joining is allowed in any phase (late joiners enter the turn rotation).
 
 ## 7. Error handling
 
-- Every incoming socket payload is validated with zod; invalid → `error` event, state unchanged.
+- Every incoming socket payload is validated with zod; invalid → `game:error` event, state unchanged.
 - Reducer returns typed `GameError {code}` (e.g. `NOT_YOUR_TURN`, `NO_MOVES_LEFT`, `ANSWER_IN_PROGRESS`, `WRONG_PHASE`, `NOT_HOST`); client shows an i18n toast keyed by code.
 - Suspect answer fails (API error after SDK retries, refusal, empty answer): remove the empty answer entry, refund the move, add a system entry ("The suspect stays silent… try again"), keep the turn with the same player, do not touch the suspect's history.
 - Case generation fails after retries: phase back to `lobby`, `error` event with code `CASE_GENERATION_FAILED`.
@@ -166,4 +167,4 @@ RoomState {
 
 ## 10. Out of scope (MVP)
 
-Accounts, database/Redis persistence, a second LLM pass that reviews case solvability, scoring and leaderboards, deployment and hosting, rate limiting/abuse protection for public use, spectator mode.
+Accounts and secure player sessions (a player id is visible to the room, so a malicious friend could impersonate someone), database/Redis persistence, a second LLM pass that reviews case solvability, scoring and leaderboards, deployment and hosting, rate limiting/abuse protection for public use, spectator mode.
