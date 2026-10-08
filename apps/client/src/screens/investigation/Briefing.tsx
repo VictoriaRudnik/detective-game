@@ -21,6 +21,16 @@ export function Briefing({ title, briefing }: { title: string; briefing: Briefin
           </div>
         ))}
       </dl>
+      {briefing.evidence.length > 0 && (
+        <>
+          <h3>{t("inv.evidence")}</h3>
+          <ul className="evidence">
+            {briefing.evidence.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }

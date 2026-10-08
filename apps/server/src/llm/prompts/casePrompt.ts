@@ -23,6 +23,7 @@ export function buildCaseUserPrompt(req: CaseRequest, feedback: string[] = []): 
     "- publicDescription is one or two sentences everyone sees at the start; it must not reveal any secret.",
     "- persona.speechStyle describes how the suspect talks, so an actor can play them consistently.",
     "- briefing contains only facts the police know at the start.",
+    "- briefing.evidence lists 1–3 physical clues the police found at the scene (objects, traces, the state of doors or windows). Each is a concrete observation, never a conclusion. Together they must be consistent with the solution and contradict or cast doubt on the killer's claimed alibi, but none may name the killer. Do not repeat them in suspects' knows lists.",
     `- Write every text field in ${LANGUAGE_NAMES[req.language]} and set language to "${req.language}".`,
   ];
   if (feedback.length > 0) {

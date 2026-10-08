@@ -13,6 +13,8 @@ export const BriefingSchema = z.object({
   timeOfDeath: z.string(),
   causeOfDeath: z.string(),
   setting: z.string(),
+  /** Physical clues the police found, visible to everyone from the start. */
+  evidence: z.array(z.string()),
 });
 
 export const SuspectSchema = z.object({

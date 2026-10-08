@@ -41,6 +41,10 @@ export function validateCase(c: GeneratedCase, req: CaseRequest): string[] {
     }
   }
 
+  if (c.briefing.evidence.length < 1 || c.briefing.evidence.length > 3) {
+    errors.push(`briefing.evidence must list 1–3 clues, got ${c.briefing.evidence.length}`);
+  }
+
   for (const path of blankTextPaths(c, "case")) {
     errors.push(`${path} must not be empty`);
   }

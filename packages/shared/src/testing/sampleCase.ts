@@ -74,6 +74,11 @@ export function sampleCase(suspectCount = 4, language: Language = "en"): Generat
       timeOfDeath: "Around 22:15",
       causeOfDeath: "Poisoning",
       setting: "A stormy autumn night; the roads were flooded and nobody could leave the manor.",
+      evidence: [
+        "A half-empty brandy glass on the desk smells faintly of bitter almonds.",
+        "The study door was locked from the inside with the key in the lock; only the family keep a spare.",
+        "A damp lace handkerchief was found under the desk.",
+      ],
     },
     solution: {
       killerId: "s1",
