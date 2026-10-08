@@ -1,0 +1,11 @@
+{
+  "name": "live-suspects",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @game/server --filter @game/client dev",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "gen:case": "pnpm --filter @game/server gen:case"
+  }
+}

@@ -1,0 +1,16 @@
+export const GAME_ERROR_CODES = [
+  "ROOM_NOT_FOUND",
+  "NOT_IN_ROOM",
+  "UNKNOWN_PLAYER",
+  "NOT_HOST",
+  "WRONG_PHASE",
+  "NOT_YOUR_TURN",
+  "NO_MOVES_LEFT",
+  "ANSWER_IN_PROGRESS",
+  "UNKNOWN_SUSPECT",
+  "INVALID_TEXT",
+  "INVALID_PAYLOAD",
+  "CASE_GENERATION_FAILED",
+] as const;
+
+export type GameErrorCode = (typeof GAME_ERROR_CODES)[number];
