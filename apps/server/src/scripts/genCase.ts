@@ -1,9 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { parseArgs } from "node:util";
 import { LanguageSchema, MAX_SUSPECTS, MIN_SUSPECTS } from "@game/shared";
 import { loadEnv } from "../env";
-import { ClaudeCaseGenerator } from "../llm/claude/ClaudeCaseGenerator";
-import { DEFAULT_MODEL } from "../llm/claude/constants";
+import { createLlm } from "../llm/createLlm";
 import { generateValidCase } from "../llm/generateValidCase";
 
 loadEnv();
@@ -23,8 +21,8 @@ if (!Number.isInteger(suspectCount) || suspectCount < MIN_SUSPECTS || suspectCou
   process.exit(1);
 }
 
-const model = process.env.CASE_MODEL ?? DEFAULT_MODEL;
-const generator = new ClaudeCaseGenerator(new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }), model);
+const generator = createLlm(process.env).caseGenerator;
+const model = "model" in generator ? String(generator.model) : "the fake generator";
 const startedAt = Date.now();
 const generated = await generateValidCase(generator, { language, suspectCount });
 
