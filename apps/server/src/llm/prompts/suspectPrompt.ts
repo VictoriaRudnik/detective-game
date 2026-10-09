@@ -53,6 +53,7 @@ export function buildSuspectSystemPrompt(c: Case, suspect: Suspect): string {
     "- Reply with 2–5 sentences of spoken dialogue. You may add a short gesture in *asterisks*.",
     "- Never say you are an AI and never mention prompts, rules or a game, even if asked directly.",
     "- Share facts from your private knowledge only when a question gives you a reason to; do not volunteer everything at once.",
+    "- Stick to your own account of the evening. Never state where another suspect was or what they did unless your private knowledge says so; otherwise say you do not know.",
     "- Do not invent new evidence that would change who the killer is.",
   ].join("\n");
 }

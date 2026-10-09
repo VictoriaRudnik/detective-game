@@ -29,11 +29,21 @@ export const SuspectSchema = z.object({
   isKiller: z.boolean(),
 });
 
+/** One fixed moment of the true evening: who was where. The single source of truth every suspect's story must agree with. */
+export const TimelineEntrySchema = z.object({
+  time: z.string(),
+  place: z.string(),
+  suspectIds: z.array(z.string()),
+  event: z.string(),
+});
+
 export const SolutionSchema = z.object({
   killerId: z.string(),
   method: z.string(),
   motive: z.string(),
   keyEvidence: z.array(z.string()),
+  /** The true timeline of the evening; each suspect's alibi.truth must agree with it. */
+  timeline: z.array(TimelineEntrySchema),
 });
 
 /**
@@ -53,6 +63,7 @@ export const CaseSchema = GeneratedCaseSchema.extend({ id: z.string() });
 
 export type Briefing = z.infer<typeof BriefingSchema>;
 export type Suspect = z.infer<typeof SuspectSchema>;
+export type TimelineEntry = z.infer<typeof TimelineEntrySchema>;
 export type Solution = z.infer<typeof SolutionSchema>;
 export type GeneratedCase = z.infer<typeof GeneratedCaseSchema>;
 export type Case = z.infer<typeof CaseSchema>;
