@@ -68,4 +68,28 @@ describe("validateCase", () => {
     c.suspects[2]!.secret = "   ";
     expect(validateCase(c, req)).toEqual(["case.suspects[2].secret must not be empty"]);
   });
+
+  it("rejects an empty timeline", () => {
+    const c = sampleCase(4);
+    c.solution.timeline = [];
+    expect(validateCase(c, req)).toEqual([expect.stringContaining("timeline must not be empty")]);
+  });
+
+  it("rejects a suspect in two places at the same time", () => {
+    const c = sampleCase(4);
+    c.solution.timeline.push({ time: "21:30", place: "library", suspectIds: ["s2"], event: "Reading." });
+    expect(validateCase(c, req)).toEqual([expect.stringContaining("two places")]);
+  });
+
+  it("rejects a suspect missing from the timeline", () => {
+    const c = sampleCase(4);
+    c.solution.timeline = c.solution.timeline.map((e) => ({ ...e, suspectIds: e.suspectIds.filter((id) => id !== "s4") }));
+    expect(validateCase(c, req)).toEqual([expect.stringContaining('place suspect "s4"')]);
+  });
+
+  it("rejects a timeline naming an unknown suspect", () => {
+    const c = sampleCase(4);
+    c.solution.timeline.push({ time: "22:00", place: "hall", suspectIds: ["s9"], event: "?" });
+    expect(validateCase(c, req)).toEqual([expect.stringContaining('unknown suspect "s9"')]);
+  });
 });

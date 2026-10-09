@@ -1,4 +1,4 @@
-import type { GeneratedCase, Language, Suspect } from "../case";
+import type { GeneratedCase, Language, Suspect, TimelineEntry } from "../case";
 
 const SUSPECTS: Suspect[] = [
   {
@@ -85,7 +85,20 @@ export function sampleCase(suspectCount = 4, language: Language = "en"): Generat
       method: "Poison poured into his evening brandy",
       motive: "Edmund refused to pay her gambling debts and was about to cut her out of his will.",
       keyEvidence: suspects.filter((s) => !s.isKiller).map((s) => s.knows[0]!),
+      timeline: timelineFor(suspects.map((s) => s.id)),
     },
     suspects,
   };
+}
+
+/** The true evening of the sample case, limited to the suspects that exist. */
+function timelineFor(ids: string[]): TimelineEntry[] {
+  const draft: TimelineEntry[] = [
+    { time: "21:30", place: "drawing room", suspectIds: ["s2", "s4"], event: "The doctor and Thomas Reed play cards." },
+    { time: "21:40", place: "study", suspectIds: ["s1"], event: "Margaret poisons the brandy." },
+    { time: "21:40", place: "back door", suspectIds: ["s3", "s5"], event: "Lucy meets Henry in secret." },
+  ];
+  return draft
+    .map((e) => ({ ...e, suspectIds: e.suspectIds.filter((id) => ids.includes(id)) }))
+    .filter((e) => e.suspectIds.length > 0);
 }

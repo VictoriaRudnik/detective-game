@@ -41,6 +41,8 @@ export function validateCase(c: GeneratedCase, req: CaseRequest): string[] {
     }
   }
 
+  errors.push(...timelineProblems(c, ids));
+
   if (c.briefing.evidence.length < 1 || c.briefing.evidence.length > 3) {
     errors.push(`briefing.evidence must list 1–3 clues, got ${c.briefing.evidence.length}`);
   }
@@ -58,4 +60,36 @@ function blankTextPaths(value: unknown, path: string): string[] {
     return Object.entries(value).flatMap(([key, item]) => blankTextPaths(item, `${path}.${key}`));
   }
   return [];
+}
+
+/** The timeline is the shared truth of the evening, so it must be physically possible and cover every suspect. */
+function timelineProblems(c: GeneratedCase, ids: string[]): string[] {
+  const errors: string[] = [];
+  const timeline = c.solution.timeline;
+  if (timeline.length === 0) {
+    return ["solution.timeline must not be empty"];
+  }
+
+  const placeAt = new Map<string, string>(); // `${time}|${suspectId}` -> place
+  const seen = new Set<string>();
+  for (const entry of timeline) {
+    for (const id of entry.suspectIds) {
+      if (!ids.includes(id)) {
+        errors.push(`solution.timeline mentions unknown suspect "${id}"`);
+        continue;
+      }
+      seen.add(id);
+      const key = `${normalize(entry.time)}|${id}`;
+      const place = normalize(entry.place);
+      const earlier = placeAt.get(key);
+      if (earlier !== undefined && earlier !== place) {
+        errors.push(`solution.timeline puts suspect "${id}" in two places ("${earlier}" and "${place}") at "${entry.time}"`);
+      }
+      placeAt.set(key, place);
+    }
+  }
+  for (const id of ids) {
+    if (!seen.has(id)) errors.push(`solution.timeline must place suspect "${id}" at least once`);
+  }
+  return errors;
 }
